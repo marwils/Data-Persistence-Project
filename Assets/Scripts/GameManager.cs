@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -7,23 +8,27 @@ public class GameManager : MonoBehaviour
     [Header("General")]
     [SerializeField]
     private Brick m_brickPrefab;
+
     [SerializeField]
     private int m_lineCount = 6;
+
     [SerializeField]
     private Rigidbody m_ball;
 
     [Header("UI Elements")]
     [SerializeField]
     private Text m_scoreText;
+
     [SerializeField]
     private GameObject m_gameOverText;
 
-    private bool m_Started = false;
-    private int m_Points;
+    [SerializeField]
+    private Button m_backButton;
 
+    private bool m_Started = false;
+    private int m_points;
     private bool m_GameOver = false;
 
-    // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
@@ -40,6 +45,16 @@ public class GameManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+    }
+
+    void OnEnable()
+    {
+        m_backButton.onClick.AddListener(BackToMenu);
+    }
+
+    void OnDisable()
+    {
+        m_backButton.onClick.RemoveAllListeners();
     }
 
     private void Update()
@@ -66,15 +81,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void UpdateScoreText()
+    {
+        List<MainManager.HighscoreData> highscores = MainManager.Instance.GetHighscores();
+        if (highscores.Count == 0)
+        {
+            m_scoreText.text = "";
+        }
+        else
+        {
+            m_scoreText.text = $"Best Score : {highscores[0].playerName} : {highscores[0].score}";
+        }
+    }
+
     void AddPoint(int point)
     {
-        m_Points += point;
-        m_scoreText.text = $"Score : {m_Points}";
+        m_points += point;
+        m_scoreText.text = $"Score : {m_points}";
     }
 
     public void GameOver()
     {
+        MainManager.Instance.AddToHighscores(m_points);
         m_GameOver = true;
         m_gameOverText.SetActive(true);
+    }
+
+    private void BackToMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }
