@@ -2,11 +2,12 @@ using UnityEngine;
 
 public class DeathZone : MonoBehaviour
 {
-    public GameManager Manager;
+    [SerializeField]
+    private GameManager m_manager;
 
     private void OnCollisionEnter(Collision other)
     {
         Destroy(other.gameObject);
-        Manager.GameOver();
+        m_manager.GameOver();
     }
 }
